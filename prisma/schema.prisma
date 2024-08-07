@@ -1,0 +1,21 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"] // Added for linux
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model NewsPost {
+  id     Int      @id @default(autoincrement())
+  title  String
+  date   DateTime // When the article is posted
+  url    String // The link to the article
+  source String // Where the article is posted
+  author String? // Who wrote the article
+  theme  String? // The theme of the article 
+
+  @@unique([title, source]) // To stop duplicate articles, same title for multiple sources is okay
+}

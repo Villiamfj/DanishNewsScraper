@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  news:
+    build: .
+    ports:
+      - "80:80"
+
+    volumes:
+      - ./prisma:/app/prisma
+
+    environment:
+      port: "80"
+      address: "0.0.0.0"
+      updateIntervalMinutes: 62
+      maxPostAgeHours: 103

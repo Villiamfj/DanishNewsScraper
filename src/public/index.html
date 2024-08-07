@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>The News</title>
+</head>
+
+<body>
+    <h1>The News</h1>
+    <div id="news"></div>
+
+</body>
+
+<script>
+    fetch('/posts')
+        .then(response => response.json())
+        .then(data => {
+
+            // sort data by date
+
+            data.sort((a, b) => {
+                return new Date(b.date) - new Date(a.date);
+            });
+
+            const news = document.getElementById('news');
+
+            for (let post of data) {
+                console.log(post);
+                let postElement = document.createElement('div');
+
+                // creating post, showing theme if available
+                postElement.innerHTML = `
+                <h2>${post.title}</h2>
+                <p>${new Date(post.date).toLocaleString("da-dk")}</p >
+                <p>${post.theme ? post.source + " - " + post.theme : post.source}</p>
+                `;
+
+                postElement.className = 'post';
+
+                postElement.onclick = () => {
+                    window.location.href = post.url;
+                };
+
+                news.appendChild(postElement);
+            }
+        });
+
+</script>
+
+<style>
+    * {
+        font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
+    }
+
+    .post {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: pointer;
+        margin: 3px;
+        margin-bottom: 20px;
+        padding: 20px;
+        border: 1px solid #ccc;
+        width: 500px;
+        border-radius: 5px;
+    }
+
+    .post:hover {
+        background-color: #b8bece;
+    }
+
+    #news {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 100px;
+    }
+
+    h2 {
+        margin-bottom: 0px;
+    }
+</style>
+
+</html>
