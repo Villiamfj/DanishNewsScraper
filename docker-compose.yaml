@@ -12,5 +12,5 @@ services:
     environment:
       port: "80"
       address: "0.0.0.0"
-      updateIntervalMinutes: 62
-      maxPostAgeHours: 103
+      updateIntervalMinutes: 60
+      maxPostAgeHours: 48
