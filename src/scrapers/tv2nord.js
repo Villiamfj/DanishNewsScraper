@@ -8,43 +8,34 @@ const { JSDOM } = jsdom;
 async function scrape() {
     const result = [];
 
-    const dom = await JSDOM.fromURL('https://www.tv2nord.dk/seneste-nyt');
+    const dom = await JSDOM.fromURL("https://www.tv2nord.dk/");
+    const document = dom.window.document;
 
-    let stories = dom.window.document.getElementsByClassName("nav-entry-wrapper relative pb-[5px]");
+    const stories = document.getElementsByClassName("@container relative w-full block")
+    const hrefs = [];
 
-    const date = new Date();
-    /*
-        using the current date instead of scraping because of difficulties with their website
-        the website is rendered with JavaScript which makes it difficult to scrape
-    */
 
     for (story of stories) {
-
-        result.push(
-            {
-                title: story.textContent.trim(),
-                date: date,
-                url: story.childNodes[4].href,
-                source: "TV2 Nord",
-            }
-        )
+        const href = story.href;
+        hrefs.push(href);
     }
+
+    const titleHeaders = document.getElementsByClassName(" text-white group-hover:underline font-medium text-xl/tight @4xs:text-lg/tight @3xs:text-xl/tight @2xs:text-2xl/tight @xs:text-3xl/tight @sm:text-4xl/tight")
+    const titles = [];
+    for (title of titleHeaders) {
+        // removing newlines and extra spaces
+        titles.push(title.textContent.replace(/\n/g, "").trim().replace(/\s+/g, " "));
+    }
+    for (let i = 0; i < titles.length; i++) {
+        result.push({
+            title: titles[i],
+            date: new Date(),
+            url: hrefs[i],
+            source: "TV2 Nord"
+        });
+    }
+
     return result;
-}
-
-
-function formatTime(time) {
-    // 24. JUL 2024, 12:34
-    console.log(time);
-
-    const date = time.split(".")[0];
-    const month = time.split(" ")[1];
-    const year = time.split(" ")[2];
-
-    const hours = time.split(", ")[1].split(":")[0];
-    const minutes = time.split(":")[1];
-
-    return new Date(`${year}-${month}-${date}T${hours}:${minutes}`);
 }
 
 exports.scrape = scrape;
