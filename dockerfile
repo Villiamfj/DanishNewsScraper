@@ -13,7 +13,4 @@ RUN npm install
 
 COPY . .
 
-# database setup
-RUN npx prisma generate
-
 CMD [ "npm", "run" , "dev" ]

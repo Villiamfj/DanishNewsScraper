@@ -6,8 +6,15 @@ This project can be extended to scrape other news sites by adding Javascript fil
 A SQLite database is used to store the news headlines, this can be switched by changing the file at `prisma/schema.prisma`.
 
 
-## How to run with docker
-This service can easily be started by using docker-compose as such:
+## How to run
+
+### Migrate
+To setup the database before usage run the following command:
+
+``` npx prisma migrate --name init```
+
+### Running with docker
+This service can then be started by using docker-compose as such:
 
 ```docker-compose up```
 
