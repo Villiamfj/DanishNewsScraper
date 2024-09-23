@@ -11,26 +11,29 @@ async function scrape() {
     const dom = await JSDOM.fromURL("https://www.tv2nord.dk/");
     const document = dom.window.document;
 
-    const stories = document.getElementsByClassName("@container relative w-full block")
-    const hrefs = [];
+    const stories = document.getElementsByClassName("font-medium");
+    // First result is a hotbar, remove the hotbar¨
 
 
-    for (story of stories) {
-        const href = story.href;
-        hrefs.push(href);
-    }
+    const date = new Date();
 
-    const titleHeaders = document.getElementsByClassName(" text-white group-hover:underline font-medium text-xl/tight @4xs:text-lg/tight @3xs:text-xl/tight @2xs:text-2xl/tight @xs:text-3xl/tight @sm:text-4xl/tight")
-    const titles = [];
-    for (title of titleHeaders) {
-        // removing newlines and extra spaces
-        titles.push(title.textContent.replace(/\n/g, "").trim().replace(/\s+/g, " "));
-    }
-    for (let i = 0; i < titles.length; i++) {
+
+    for (let i = 1; i < stories.length; i++) {
+        const story = stories[i];
+        const title = story.textContent.replace(/\n/g, "").trim().replace(/\s+/g, " ");
+        let url = story.parentNode.href;
+
+        if (!url) { // There are multiple kinds of news containers on the site
+            url = story.parentNode.parentNode.href;
+        }
+
+        // if url is still not found, log it
+        if (!url) console.log("No url found for title: " + title, " (TV2 Nord)");
+
         result.push({
-            title: titles[i],
-            date: new Date(),
-            url: hrefs[i],
+            title,
+            url,
+            date: date,
             source: "TV2 Nord"
         });
     }

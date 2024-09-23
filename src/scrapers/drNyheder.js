@@ -12,9 +12,9 @@ async function scrape() {
         const title = story.childNodes[1].text
         const url = story.childNodes[1].href
 
-        const theme = story.childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent
+        const time = story.childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent
 
-        const time = story.childNodes[0].childNodes[0].childNodes[0].childNodes[1].textContent
+        const theme = story.childNodes[0].childNodes[0].childNodes[0].childNodes[1].textContent
 
         result.push({
             title,
@@ -76,5 +76,6 @@ function convertDRTime(time) {
 
     throw new Error("Unknown time format: " + time);
 }
+
 
 exports.scrape = scrape;
