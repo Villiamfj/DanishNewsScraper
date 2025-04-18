@@ -4,6 +4,7 @@ WORKDIR /app
 
 # setting timezoen to Europe/Copenhagen
 RUN apk add --no-cache tzdata
+RUN apk add --no-cache openssl
 ENV TZ=Europe/Copenhagen
 
 COPY package.json package.json
