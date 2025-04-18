@@ -11,7 +11,7 @@ A SQLite database is used to store the news headlines, this can be switched by c
 ### Migrate
 To setup the database before usage run the following command:
 
-``` npx prisma migrate --name init```
+``` npx prisma migrate dev --name init```
 
 ### Running with docker
 This service can then be started by using docker-compose as such:
