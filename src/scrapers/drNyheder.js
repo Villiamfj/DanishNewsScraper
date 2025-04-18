@@ -1,81 +1,67 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 
+// Some of these feeds are commented out because of duplicate news.
+const drRssFeeds = [
+    //{ theme: "Seneste nyt", url: "https://www.dr.dk/nyheder/service/feeds/senestenyt" },
+    //{ theme: "Indland", url: "https://www.dr.dk/nyheder/service/feeds/indland" },
+    { theme: "Udland", url: "https://www.dr.dk/nyheder/service/feeds/udland" },
+    { theme: "Penge", url: "https://www.dr.dk/nyheder/service/feeds/penge" },
+    { theme: "Politik", url: "https://www.dr.dk/nyheder/service/feeds/politik" },
+    { theme: "Sporten", url: "https://www.dr.dk/nyheder/service/feeds/sporten" },
+    //{ theme: "Seneste sport", url: "https://www.dr.dk/nyheder/service/feeds/senestesport" },
+    { theme: "Viden", url: "https://www.dr.dk/nyheder/service/feeds/viden" },
+    { theme: "Kultur", url: "https://www.dr.dk/nyheder/service/feeds/kultur" },
+    { theme: "Musik", url: "https://www.dr.dk/nyheder/service/feeds/musik" },
+    { theme: "Vejret", url: "https://www.dr.dk/nyheder/service/feeds/vejret" },
+    //{ theme: "Regionale", url: "https://www.dr.dk/nyheder/service/feeds/regionale" },
+    { theme: "DR Hovedstadsområdet", url: "https://www.dr.dk/nyheder/service/feeds/regionale/kbh" },
+    { theme: "DR Bornholm", url: "https://www.dr.dk/nyheder/service/feeds/regionale/bornholm" },
+    { theme: "DR Syd og Sønderjylland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/syd" },
+    { theme: "DR Fyn", url: "https://www.dr.dk/nyheder/service/feeds/regionale/fyn" },
+    { theme: "DR Midt- og Vestjylland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/vest" },
+    { theme: "DR Nordjylland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/nord" },
+    { theme: "DR Trekantområdet", url: "https://www.dr.dk/nyheder/service/feeds/regionale/trekanten" },
+    { theme: "DR Sjælland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/sjaelland" },
+    { theme: "DR Østjylland", url: "https://www.dr.dk/nyheder/service/feeds/regionale/oestjylland" }
+]
 
-async function scrape() {
+
+async function rssScraper() {
     const result = [];
 
-    const dom = await JSDOM.fromURL('https://dr.dk/nyheder');
-    const news = dom.window.document.getElementsByClassName("hydra-latest-news-teaser__content");
+    for (const feed of drRssFeeds) {
+        result.push(...(await scrapeRss(feed.url, feed.theme)))
+    }
 
-    for (let story of news) {
-        const title = story.childNodes[1].text
-        const url = story.childNodes[1].href
+    return result;
+}
 
-        const time = story.childNodes[0].childNodes[0].childNodes[0].childNodes[0].textContent
+async function scrapeRss(rssLink, theme) {
+    const result = [];
+    const dom = await JSDOM.fromURL(rssLink)
 
-        const theme = story.childNodes[0].childNodes[0].childNodes[0].childNodes[1].textContent
+    const articles = dom.window.document.getElementsByTagName("item")
+
+    for (const article of articles) {
+        const url = article.getElementsByTagName("link")[0].innerHTML;
+        const title = removeCdataFromTitle(article.getElementsByTagName("title")[0].innerHTML)
+        const time = article.getElementsByTagName("pubDate")[0].innerHTML;
 
         result.push({
             title,
             url,
             theme,
-            date: convertDRTime(time),
-            source: "dr.dk/nyheder"
+            date: new Date(time),
+            source: "dr.dk rss"
         });
     }
 
     return result;
 }
 
-
-// converts time string from dr.dk to a Date object
-function convertDRTime(time) {
-    // two cases to consider:
-    // from x minuts ago
-    if (time.includes("min. siden")) {
-        // extract number of minutes
-        const minutes = parseInt(time.split(" ")[0]);
-
-        // create a new Date object
-        const date = new Date();
-        date.setMinutes(date.getMinutes() - minutes);
-        return date;
-    }
-    // Today at hh:mm
-    if (time.includes("I dag")) {
-        // extract time
-        const timeSplit = time.split("kl. ")[1];
-        const hhmm = timeSplit.split(":");
-        const hours = parseInt(hhmm[0]);
-        const minutes = parseInt(hhmm[1]);
-
-        // create a new Date object
-        const date = new Date();
-        date.setHours(hours);
-        date.setMinutes(minutes);
-        return date;
-    }
-    if (time.includes("Lige nu")) {
-        return new Date(); // current time
-    }
-    if (time.includes("I går")) {
-        // extract time
-        const timeSplit = time.split("kl. ")[1];
-        const hhmm = timeSplit.split(":");
-        const hours = parseInt(hhmm[0]);
-        const minutes = parseInt(hhmm[1]);
-
-        // create a new Date object
-        const date = new Date();
-        date.setDate(date.getDate() - 1);
-        date.setHours(hours);
-        date.setMinutes(minutes);
-        return date;
-    }
-
-    throw new Error("Unknown time format: " + time);
+function removeCdataFromTitle(title) {
+    return title.replace("<![CDATA[", "").replace("]]>", "")
 }
 
-
-exports.scrape = scrape;
+exports.scrape = rssScraper;
